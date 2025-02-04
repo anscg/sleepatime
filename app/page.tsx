@@ -1,6 +1,14 @@
-import { LoginButton } from "@/components/login-button"
+import { LoginButton } from "@/components/login-button";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getSession();
+  
+  if (session.isLoggedIn) {
+    redirect('/dashboard');
+  }
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-900 via-indigo-900 to-blue-900 text-white p-4">
       <div className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 shadow-xl">

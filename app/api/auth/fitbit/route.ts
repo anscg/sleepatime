@@ -1,5 +1,9 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { prisma } from '@/lib/prisma';
+import { SessionData } from '@/lib/session';
 
 const FITBIT_CLIENT_ID = process.env.FITBIT_CLIENT_ID as string;
 const FITBIT_CLIENT_SECRET = process.env.FITBIT_CLIENT_SECRET as string;
@@ -45,9 +49,48 @@ export async function GET(request: Request): Promise<Response> {
       }
     );
 
-    const { access_token, refresh_token, user_id } = tokenResponse.data;
+    const { access_token, refresh_token, user_id, expires_in } = tokenResponse.data;
+    
+    // Calculate token expiration date
+    const expirationDate = new Date();
+    expirationDate.setSeconds(expirationDate.getSeconds() + expires_in);
+    
+    // Store or update user in database
+    await prisma.user.upsert({
+      where: { userId: user_id },
+      update: {
+        accessToken: access_token,
+        refreshToken: refresh_token,
+        tokenExpires: expirationDate,
+      },
+      create: {
+        userId: user_id,
+        accessToken: access_token,
+        refreshToken: refresh_token,
+        tokenExpires: expirationDate,
+      },
+    });
+    
+    // Set session
+    const session = await getIronSession<SessionData>(cookies(), {
+      password: process.env.SESSION_SECRET as string,
+      cookieName: 'sleeptime-session',
+      cookieOptions: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: '/',
+      },
+    });
+    
+    session.userId = user_id;
+    session.isLoggedIn = true;
+    await session.save();
+    
+    // Redirect to dashboard or homepage after successful login
+    return NextResponse.redirect(new URL('/', request.url));
 
-    return NextResponse.json({ access_token, refresh_token, user_id });
   } catch (error: any) {
     console.error('Error exchanging token:', error.response?.data || error);
     return NextResponse.json(
