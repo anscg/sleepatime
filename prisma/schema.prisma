@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  userId        String    @unique // Fitbit user ID
-  accessToken   String
-  refreshToken  String
-  tokenExpires  DateTime
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  accessToken    String
+  refreshToken   String
+  tokenExpires   DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   wakatimeApiKey String?
-  wakatimeApiUrl String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  wakatimeApiUrl String?  @default("")
+  wakatimeRefreshToken String?
+  wakatimeTokenExpires DateTime?
 }

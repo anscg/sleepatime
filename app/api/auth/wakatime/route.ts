@@ -61,6 +61,13 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    // Calculate token expiration date if expires_in is available
+    let tokenExpires = null;
+    if (tokenData.expires_in) {
+      tokenExpires = new Date();
+      tokenExpires.setSeconds(tokenExpires.getSeconds() + parseInt(tokenData.expires_in));
+    }
+    
     // Get user data from WakaTime
     const userResponse = await fetch('https://wakatime.com/api/v1/users/current', {
       headers: {
@@ -82,6 +89,8 @@ export async function GET(request: NextRequest) {
       },
       data: {
         wakatimeApiKey: tokenData.access_token,
+        wakatimeRefreshToken: tokenData.refresh_token,
+        wakatimeTokenExpires: tokenExpires,
         wakatimeApiUrl: userData.data.api_url,
       },
     });
