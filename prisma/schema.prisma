@@ -16,6 +16,8 @@ model User {
   accessToken   String
   refreshToken  String
   tokenExpires  DateTime
+  wakatimeApiKey String?
+  wakatimeApiUrl String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

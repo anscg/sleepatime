@@ -5,10 +5,12 @@ import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
+
 export const metadata = {
   title: "sleepatime - Sync Fitbit sleep data to WakaTime",
   description: "Track your sleep like you track your code. Automatically sync your Fitbit sleep data to WakaTime.",
 }
+
 
 export default function RootLayout({
   children,
