@@ -14,7 +14,7 @@ RUN bun run build
 
 EXPOSE 3000
 
-RUN echo '#!/bin/sh\nbun run start & bun run cron-job.ts & wait -n' > /app/start.sh
+RUN echo '#!/bin/bash\ntrap "exit" INT TERM\ntrap "kill 0" EXIT\nbun run start &\nbun run cron-job.ts &\nwait' > /app/start.sh
 RUN chmod +x /app/start.sh
 
-CMD ["/app/start.sh"]
+CMD ["/bin/bash", "/app/start.sh"]
